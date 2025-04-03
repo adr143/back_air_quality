@@ -1,0 +1,14 @@
+// {
+//     "type": "service_account",
+//     "project_id": "air-quality-monitoring-8-gases",
+//     "private_key_id": "247a6bf9ecbd37dd7a08729bac68268c36e38eab",
+//     "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCK1XT6XG5nz8DT\nrw4qTk6R6jV4uMcbDewHSUbdOe6yEqfbVyWGfCqSkxvhCCRtejAqlWeX2uP9DH/Y\nFdOBrY9gCFRIKrH9r+XceEkIAMcZOmruPEhrobrH0FGWyxkTeM2ifrtOyq6NRBee\noTX9QS4SweuYWICWWFcY6IHkIfdEcfmaoGQO46EZA+kheA6QzPkqr9uIh17mrJvN\neRfj4OF0auj+MQbSiMcxUCMa3BUfFxCta82S7CgObjJEtueOHPmd030kQi3Kjty0\nBUFBLINwrxXDfC2ykYx+8hzAstbckr9UBJIZMaD9bVTbn1CiO0Ebkgl7XvPFvaVH\ns/rtb/QtAgMBAAECggEAJZOEp8ags0RNwn2c7eJn7aJgep44daAdBBPXNEVbz6Kw\n//LkWzP8KdPbNdsIUQFDTCNH+JfsIS9i4s91gaHCLpHSjf3QUwNqyXNdAOeE+9UN\n4BE84LTTYwWFL7Ukwlpt/c8jTz4YZG/LnMmxXSxpFfaal49MrmSWnk0/6skurb1t\nWfHeSyfxK3MwoAV51gqRHD10zz5pjVv/PKTqP0IDVFI8vGUoBRsGzm9vwcOiPaK+\neMN1IFG0GEDBUU+9N6oKerQVyRWtBjlIUFFCsMeusi7zmEw5k4xcKHEJVHZug2oE\nIViX3YBJNP1TPwvZTfiSouJ/WGJDMNgHLeAjcrir2QKBgQDEEK74WKYiML/bg49i\nZJEkuudn42pp5AHAWfSqBSujWVEHiNOXLG+wimfMXtfvNt5dsdnMY7xVULsZKVhr\najxka2IAYZr3ajJXZ3ZgDRTfaTWn+n5hu2sx0CJkLFBewsZA5P8GPR35M/GPbvp/\n9m1as7e4QU+wHMRpx3VJBSBAiwKBgQC1RhCXT70Z8p9+v58Kglwc2KPOs9/IElGK\npmdDWZSsxJJCdpQvrl317WQxp6zrUpLBTn/ST7vtCYsgd2cqYBl5Cxe9g/71jEnz\n+L3T7NljLCMvRnflT9KfT690JiAYaro6qzkF9JwHxbHNYro6QqcCussSzxB0Mb7I\nA+CTyg89JwKBgQCc3khP1QWfJ2fpptoKvDHQtGW/Hhoe/NlV3+M8QQTIHgcRwyyf\nsGLwWdxwjJWyBDFnv4tl14pwrDX2DLl8v7PwGGaBrZZCTEpY2iPA99ZyZYgTjPyf\nD0fVxBQwF7B6ENZ0R4OvpyibIS8tNnrf9PdLca0Vk9PBMVMI2xgAw0QpvwKBgQCR\nVSYyGeTza7kCBqF87HzrR6k1LLNKlZ04eycpMSXoygS1MpqmC7cbV4NP6C3T0TUF\ntGj4daKmbVNU6UYWDEv/5qvW7n+34AzehFu1EBxNzXI8EdRIThIAVgPGLFbpHJBI\nP0SNiMqb1J0znGbQFOYPYzEy2D5J2iQp+inQc1x6WwKBgEGcu8iYNyD1tLrTTsM3\nz1x6MV4G1O7Yq/hxuLujOdLDKF3LVxKEzzPEi4WtohnR7r8omt3+PJP6eUeqrtjZ\na9KLThwAJTqVJNKoRDwNOCc8pZ+qTpIoO+dWjRD13HpIxyajpro/fMU9saRDfwv4\nQ6x7b8spPqfGrmTbjs1EdvZQ\n-----END PRIVATE KEY-----\n",
+//     "client_email": "firebase-adminsdk-fbsvc@air-quality-monitoring-8-gases.iam.gserviceaccount.com",
+//     "client_id": "104841189984644868827",
+//     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+//     "token_uri": "https://oauth2.googleapis.com/token",
+//     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+//     "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40air-quality-monitoring-8-gases.iam.gserviceaccount.com",
+//     "universe_domain": "googleapis.com"
+//   }
+  

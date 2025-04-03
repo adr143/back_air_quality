@@ -1,0 +1,58 @@
+2025-03-31 17:33:21.779034: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.
+2025-03-31 17:33:21.781907: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.
+2025-03-31 17:33:21.789781: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:467] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1743413601.802521  250022 cuda_dnn.cc:8579] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1743413601.806478  250022 cuda_blas.cc:1407] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+W0000 00:00:1743413601.816624  250022 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1743413601.816645  250022 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1743413601.816647  250022 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1743413601.816649  250022 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+2025-03-31 17:33:21.819756: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+E0000 00:00:1743413603.735152  250022 cuda_executor.cc:1228] INTERNAL: CUDA Runtime error: Failed call to cudaGetRuntimeVersion: Error loading CUDA libraries. GPU will not be used.: Error loading CUDA libraries. GPU will not be used.
+W0000 00:00:1743413603.736148  250022 gpu_device.cc:2341] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+Next email scheduled in 10.44 hours.
+ * Serving Flask app 'main'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+2025-03-31 17:33:24.488600: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.
+2025-03-31 17:33:24.491472: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.
+2025-03-31 17:33:24.499259: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:467] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1743413604.511847  250094 cuda_dnn.cc:8579] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1743413604.515967  250094 cuda_blas.cc:1407] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+W0000 00:00:1743413604.526033  250094 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1743413604.526052  250094 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1743413604.526077  250094 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1743413604.526080  250094 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+2025-03-31 17:33:24.529188: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+E0000 00:00:1743413605.952563  250094 cuda_executor.cc:1228] INTERNAL: CUDA Runtime error: Failed call to cudaGetRuntimeVersion: Error loading CUDA libraries. GPU will not be used.: Error loading CUDA libraries. GPU will not be used.
+W0000 00:00:1743413605.952925  250094 gpu_device.cc:2341] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+ * Debugger is active!
+ * Debugger PIN: 240-087-467
+127.0.0.1 - - [31/Mar/2025 18:25:02] "[33mGET / HTTP/1.1[0m" 404 -
+/home/traffikosv/Documents/aadd/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2739: UserWarning: X does not have valid feature names, but MinMaxScaler was fitted with feature names
+  warnings.warn(
+Next email scheduled in 10.44 hours.
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 387ms/step[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 399ms/step
+/home/traffikosv/Documents/aadd/.venv/lib/python3.12/site-packages/sklearn/utils/validation.py:2739: UserWarning: X does not have valid feature names, but StandardScaler was fitted with feature names
+  warnings.warn(
+[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 32ms/step[1m1/1[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 41ms/step
+127.0.0.1 - - [31/Mar/2025 19:26:44] "GET /api/sensor-data/true HTTP/1.1" 200 -
+127.0.0.1 - - [31/Mar/2025 19:34:51] "[33mGET / HTTP/1.0[0m" 404 -
+127.0.0.1 - - [31/Mar/2025 19:34:51] "[33mGET /favicon.ico HTTP/1.0[0m" 404 -
+127.0.0.1 - - [31/Mar/2025 19:39:53] "[33mOPTIONS /socket.io/?EIO=4&transport=polling&t=PNi03pT HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Mar/2025 19:39:53] "[33mGET /socket.io/?EIO=4&transport=polling&t=PNi03pT HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Mar/2025 19:39:54] "[33mOPTIONS /socket.io/?EIO=4&transport=polling&t=PNi048R HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Mar/2025 19:39:54] "[33mGET /socket.io/?EIO=4&transport=polling&t=PNi048R HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Mar/2025 19:39:55] "[33mOPTIONS /socket.io/?EIO=4&transport=polling&t=PNi04QM HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Mar/2025 19:39:55] "[33mGET /socket.io/?EIO=4&transport=polling&t=PNi04QM HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Mar/2025 19:39:59] "[33mOPTIONS /socket.io/?EIO=4&transport=polling&t=PNi05MK HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Mar/2025 19:39:59] "[33mGET /socket.io/?EIO=4&transport=polling&t=PNi05MK HTTP/1.1[0m" 404 -
