@@ -25,14 +25,14 @@ BASE_DIR = os.getcwd()
 
 MODEL_PATH = os.path.join(BASE_DIR, 'air_quality_model_v5.h5')
 
-AQI_MODEL_PATH = os.path.join(BASE_DIR, 'aq_class.h5')
+AQI_MODEL_PATH = os.path.join(BASE_DIR, 'air_index.h5')
 
 model = load_model(MODEL_PATH, compile=False)
 
 aqi_model = load_model(AQI_MODEL_PATH, compile=False)
 
 SCALER_PATH = os.path.join(BASE_DIR, 'air_scaler.pkl')
-AQI_SCALER_PATH = os.path.join(BASE_DIR, 'aqi_scaler.pkl')
+AQI_SCALER_PATH = os.path.join(BASE_DIR, 'air_index_scaler.pkl')
 LABEL_ENCODER_PATH = os.path.join(BASE_DIR, 'label_encoder.pkl')
 
 scaler = joblib.load(SCALER_PATH)
@@ -75,10 +75,10 @@ def aqi_classification(gas_values):
     predictions = aqi_model.predict(new_sample_scaled)
 
     # Get the predicted class
-    predicted_class = np.argmax(predictions)  # Get the index of highest probability
-    predicted_label = label_encoder.inverse_transform([predicted_class])
+    # predicted_class = np.argmax(predictions)  # Get the index of highest probability
+    # predicted_label = label_encoder.inverse_transform([predicted_class])
 
-    return predicted_label[0]    
+    return predictions[0]   
 
 def forecast_air_quality():
     data_reference = db.reference(DB_RECORDS)
@@ -130,6 +130,17 @@ def get_air_quality_advice(level: str) -> str:
     }
     
     return advice.get(level, "Invalid Air Quality Level. Please enter Good, Moderate, Unhealthy, or Dangerous.")
+
+def categorize_aqi(aqi: float) -> str:
+    """Categorizes AQI into air quality levels."""
+    if aqi <= 50:
+        return "Good"
+    elif aqi <= 100:
+        return "Moderate"
+    elif aqi <= 150:
+        return "Unhealthy"
+    else:
+        return "Dangerous"
 
 def send_air_quality_report():
     """Fetch latest air quality data and send emails to subscribers."""
@@ -258,7 +269,8 @@ def get_sensor_data(forecast):
     """API endpoint that returns latest sensor readings."""
     if forecast:
         forecast_result = forecast_air_quality()
-        aqi_class = aqi_classification(forecast_result)
+        predicted_aqi = aqi_classification(forecast_result)
+        aqi_class = categorize_aqi(predicted_aqi)
         advice = get_air_quality_advice(aqi_class)
         print(advice)
         sensor_data = [
@@ -271,7 +283,7 @@ def get_sensor_data(forecast):
             { "id": 'CO_container', "label": 'CO (PPM)', "value": "{0:.2f}".format(forecast_result.get("CO"))},
             { "id": 'PM2_container', "label": 'PM2.5 (µg/m³)', "value": "{0:.2f}".format(forecast_result.get("PM2_5"))},
             { "id": 'PM10_container', "label": 'PM10 (µg/m³)', "value": "{0:.2f}".format(forecast_result.get("PM10"))},
-            { "id": 'aqi_container', "label": 'Air Quality Class', "evaluation": aqi_class, "advice": advice}
+            { "id": 'aqi_container', "label": 'Air Quality Class', "evaluation": aqi_class, "advice": advice, "aqi": predicted_aqi}
         ]
         return jsonify(sensor_data)
     else:
@@ -312,7 +324,9 @@ def get_sensor_data(forecast):
 
     evaluation = "Good" if overall <= 50 else "Moderate" if overall <= 70 else "Bad" if overall <= 80 else "Unhealthy"
 
-    classification = aqi_classification(latest_data)
+    predicted_aqi = aqi_classification(latest_data)
+
+    classification = categorize_aqi(predicted_aqi)
 
     advice = get_air_quality_advice(classification)
 
@@ -327,7 +341,7 @@ def get_sensor_data(forecast):
             { "id": 'PM2_container', "label": 'PM2.5 (µg/m³)', "percentage": pm2, "value": "{0:.2f}".format(latest_data.get("PM2_5"))},
             { "id": 'PM10_container', "label": 'PM10 (µg/m³)', "percentage": pm10, "value": "{0:.2f}".format(latest_data.get("PM10"))},
             { "id": 'overall_container', "label": 'Air Quality', "percentage": overall, "evaluation": evaluation},
-            { "id": 'aqi_container', "label": 'Air Quality Class', "percentage": overall, "evaluation": classification, "advice": advice}
+            { "id": 'aqi_container', "label": 'Air Quality Class', "percentage": overall, "evaluation": classification, "advice": advice, "aqi":predicted_aqi}
         ]
     return jsonify(sensor_data)
 
