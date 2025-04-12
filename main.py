@@ -25,7 +25,7 @@ BASE_DIR = os.getcwd()
 
 MODEL_PATH = os.path.join(BASE_DIR, 'air_quality_model_v5.h5')
 
-AQI_MODEL_PATH = os.path.join(BASE_DIR, 'aq_class.h5')
+AQI_MODEL_PATH = os.path.join(BASE_DIR, 'aqi.keras')
 
 model = load_model(MODEL_PATH, compile=False)
 
@@ -33,7 +33,7 @@ aqi_model = load_model(AQI_MODEL_PATH, compile=False)
 
 SCALER_PATH = os.path.join(BASE_DIR, 'air_scaler.pkl')
 AQI_SCALER_PATH = os.path.join(BASE_DIR, 'aqi_scaler.pkl')
-LABEL_ENCODER_PATH = os.path.join(BASE_DIR, 'label_encoder.pkl')
+LABEL_ENCODER_PATH = os.path.join(BASE_DIR, 'aqi_laber.pkl')
 
 scaler = joblib.load(SCALER_PATH)
 aqi_scaler = joblib.load(AQI_SCALER_PATH)
@@ -68,17 +68,21 @@ COLUMN_MAPPING = {
 }
 
 def aqi_classification(gas_values):
-    sample = [[gas_values['CO'], gas_values['CO2'], gas_values['H2S'], gas_values['NO2'], gas_values['O3'], gas_values['PM2_5'], gas_values['PM10'], gas_values['SO2'], gas_values['TVOC']]]
+    sample = [[
+        gas_values['CO'], gas_values['CO2'], gas_values['NO2'], gas_values['O3'],
+        gas_values['PM2_5'], gas_values['PM10'], gas_values['SO2'],
+        gas_values['H2S'], gas_values['TVOC']
+    ]]
+    
     new_sample_scaled = aqi_scaler.transform(sample)
+    print(aqi_scaler.feature_names_in_)
 
-    # Predict class probabilities
     predictions = aqi_model.predict(new_sample_scaled)
 
-    # Get the predicted class
-    predicted_class = np.argmax(predictions)  # Get the index of highest probability
-    predicted_label = label_encoder.inverse_transform([predicted_class])
+    print(sample)
+    print(gas_values)
 
-    return predicted_label[0]    
+    return float(predictions[0][0])
 
 def forecast_air_quality():
     data_reference = db.reference(DB_RECORDS)
@@ -115,7 +119,7 @@ def forecast_air_quality():
     
     return predicted_gas_values
 
-def get_air_quality_advice(level: str) -> str:
+def get_air_quality_advice(level: float) -> str:
     advice = {
         "Good": "You can go outside and be active. It's a great day!",
         "Moderate": "If you're sensitive to air pollution, consider reducing prolonged or heavy exertion. Everyone else can enjoy outdoor activities as usual.",
@@ -124,12 +128,22 @@ def get_air_quality_advice(level: str) -> str:
             "Sensitive groups should avoid heavy exertion and stay indoors if possible. Everyone should reduce outdoor activities."
         ),
         "Dangerous": (
-            "Sensitive groups should avoid all outdoor activity. Everyone should limit exertion and stay indoors when possible.\n"
-            "Everyone should remain indoors and avoid all outdoor activity. Follow tips to reduce indoor pollution."
+            "Sensitive groups should avoid all outdoor activity. Everyone should limit exertion and stay indoors when possible. Everyone should remain indoors and avoid all outdoor activity. Follow tips to reduce indoor pollution."
         )
     }
     
     return advice.get(level, "Invalid Air Quality Level. Please enter Good, Moderate, Unhealthy, or Dangerous.")
+
+def categorize_aqi(aqi: float) -> str:
+    """Categorizes AQI into air quality levels."""
+    if aqi <= 50:
+        return "Good", "You can go outside and be active. It's a great day!"
+    elif aqi <= 100:
+        return "Moderate", "If you're sensitive to air pollution, consider reducing prolonged or heavy exertion. Everyone else can enjoy outdoor activities as usual."
+    elif aqi <= 200:
+        return "Unhealthy", "If you have heart/lung conditions, are older, or are a child, reduce prolonged or heavy exertion. Everyone else should take breaks and monitor symptoms. Sensitive groups should avoid heavy exertion and stay indoors if possible. Everyone should reduce outdoor activities."
+    else:
+        return "Dangerous", "Sensitive groups should avoid all outdoor activity. Everyone should limit exertion and stay indoors when possible. Everyone should remain indoors and avoid all outdoor activity. Follow tips to reduce indoor pollution."
 
 def send_air_quality_report():
     """Fetch latest air quality data and send emails to subscribers."""
@@ -258,8 +272,9 @@ def get_sensor_data(forecast):
     """API endpoint that returns latest sensor readings."""
     if forecast:
         forecast_result = forecast_air_quality()
-        aqi_class = aqi_classification(forecast_result)
-        advice = get_air_quality_advice(aqi_class)
+        predicted_aqi = aqi_classification(forecast_result)
+        aqi_lvl = categorize_aqi(predicted_aqi)
+        aqi_class, advice = get_air_quality_advice(aqi_class)
         print(advice)
         sensor_data = [
             { "id": 'CO2_container', "label": 'CO₂ (PPM)', "value": "{0:.2f}".format(forecast_result.get("CO2"))},
@@ -271,7 +286,7 @@ def get_sensor_data(forecast):
             { "id": 'CO_container', "label": 'CO (PPM)', "value": "{0:.2f}".format(forecast_result.get("CO"))},
             { "id": 'PM2_container', "label": 'PM2.5 (µg/m³)', "value": "{0:.2f}".format(forecast_result.get("PM2_5"))},
             { "id": 'PM10_container', "label": 'PM10 (µg/m³)', "value": "{0:.2f}".format(forecast_result.get("PM10"))},
-            { "id": 'aqi_container', "label": 'Air Quality Class', "evaluation": aqi_class, "advice": advice}
+            { "id": 'aqi_container', "label": 'Air Quality Class', "evaluation": aqi_class, "advice": advice, "aqi": aqi_lvl}
         ]
         return jsonify(sensor_data)
     else:
@@ -311,23 +326,23 @@ def get_sensor_data(forecast):
     overall = int((co2 + so2 + co + o3 + h2s + no2 + tvoc + pm2) / 8)
 
     evaluation = "Good" if overall <= 50 else "Moderate" if overall <= 70 else "Bad" if overall <= 80 else "Unhealthy"
+    print(latest_data)
+    aqi_level = round(aqi_classification(latest_data), 2)
 
-    classification = aqi_classification(latest_data)
-
-    advice = get_air_quality_advice(classification)
+    aqi_class, advice = categorize_aqi(aqi_level)
 
     sensor_data = [
             { "id": 'CO2_container', "label": 'CO₂ (PPM)', "percentage": co2, "value": "{0:.2f}".format(latest_data.get("CO2"))},
             { "id": 'TVOC_container', "label": 'TVOC (PPB)', "percentage": tvoc, "value": "{0:.2f}".format(latest_data.get("TVOC"))},
             { "id": 'SO2PPM_container', "label": 'SO₂ (PPM)', "percentage": so2, "value": "{0:.2f}".format(latest_data.get("SO2"))},
-            { "id": 'O3PPM_container', "label": 'O₃ (PPM)', "percentage": o3, "value": "{0:.2f}".format(latest_data.get("O3"))},
+            { "id": 'O3PPB_container', "label": 'O₃ (PPB)', "percentage": o3, "value": "{0:.2f}".format(latest_data.get("O3"))},
             { "id": 'H2SPPM_container', "label": 'H₂S (PPM)', "percentage": h2s, "value": "{0:.2f}".format(latest_data.get("H2S"))},
-            { "id": 'NO2PPM_container', "label": 'NO₂ (PPM)', "percentage": no2, "value": "{0:.2f}".format(latest_data.get("NO2"))},
+            { "id": 'NO2PPB_container', "label": 'NO₂ (PPB)', "percentage": no2, "value": "{0:.2f}".format(latest_data.get("NO2"))},
             { "id": 'CO_container', "label": 'CO (PPM)', "percentage": co, "value": "{0:.2f}".format(latest_data.get("CO"))},
             { "id": 'PM2_container', "label": 'PM2.5 (µg/m³)', "percentage": pm2, "value": "{0:.2f}".format(latest_data.get("PM2_5"))},
             { "id": 'PM10_container', "label": 'PM10 (µg/m³)', "percentage": pm10, "value": "{0:.2f}".format(latest_data.get("PM10"))},
             { "id": 'overall_container', "label": 'Air Quality', "percentage": overall, "evaluation": evaluation},
-            { "id": 'aqi_container', "label": 'Air Quality Class', "percentage": overall, "evaluation": classification, "advice": advice}
+            { "id": 'aqi_container', "label": 'Air Quality Class', "percentage": overall, "evaluation": aqi_class, "advice": advice, "aqi": aqi_level}
         ]
     return jsonify(sensor_data)
 
@@ -355,4 +370,4 @@ def send_test_email():
     return "Test email sent!"
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=5000)
