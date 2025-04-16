@@ -349,7 +349,7 @@ def schedule_email():
     """Runs a background thread to send the email daily at 8:00 PM."""
     while True:
         now = datetime.now()
-        target_time = now.replace(hour=11, minute=46 , second=0, microsecond=0)
+        target_time = now.replace(hour=4, minute=0 , second=0, microsecond=0)
 
         if now > target_time:
             target_time += timedelta(days=1)  # Move to next day if already past 8:00 PM

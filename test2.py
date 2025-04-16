@@ -1,1 +1,13 @@
-test_sample = {'CO': 1.764, 'CO2': 400, 'H2S': 8.699, 'NO2': 0.92, 'O3': 0.26, 'PM10': 15.6439, 'PM2_5': 15.64389, 'SO2': 0.06, 'TVOC': 0}
+import firebase_admin
+from firebase_admin import credentials, db
+
+cred = credentials.Certificate("air_q.json")
+
+# IMPORTANT: Reuse app or check if already initialized
+if not firebase_admin._apps:
+    firebase_admin.initialize_app(cred, {
+        "databaseURL": "https://air-quality-monitoring-8-gases-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    })
+
+ref = db.reference("/")  # or "tbl_logging"
+print(ref.get())
