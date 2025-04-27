@@ -21,9 +21,11 @@ from datetime import datetime, timedelta
 import time
 import threading
 
+from sms_send import send_sms
+
 BASE_DIR = os.getcwd()
 
-MODEL_PATH = os.path.join(BASE_DIR, 'air_quality_model_v5.h5')
+MODEL_PATH = os.path.join(BASE_DIR, 'air_predict.keras')
 
 AQI_MODEL_PATH = os.path.join(BASE_DIR, 'aqi.keras')
 
@@ -31,7 +33,7 @@ model = load_model(MODEL_PATH, compile=False)
 
 aqi_model = load_model(AQI_MODEL_PATH, compile=False)
 
-SCALER_PATH = os.path.join(BASE_DIR, 'air_scaler.pkl')
+SCALER_PATH = os.path.join(BASE_DIR, 'airq_scaler.pkl')
 AQI_SCALER_PATH = os.path.join(BASE_DIR, 'aqi_scaler.pkl')
 LABEL_ENCODER_PATH = os.path.join(BASE_DIR, 'aqi_laber.pkl')
 
@@ -68,9 +70,9 @@ COLUMN_MAPPING = {
 
 def aqi_classification(gas_values):
     sample = [[
-        gas_values['CO'], gas_values['CO2'], gas_values['NO2'], gas_values['O3'],
-        gas_values['PM2_5'], gas_values['PM10'], gas_values['SO2'],
-        gas_values['H2S'], gas_values['TVOC']
+        gas_values['O3'], gas_values['CO'], gas_values['CO2'], gas_values['NO2'],
+        gas_values['SO2'], gas_values['H2S'], gas_values['TVOC'],
+        gas_values['PM2_5'], gas_values['PM10']
     ]]
     
     new_sample_scaled = aqi_scaler.transform(sample)
@@ -147,6 +149,24 @@ def categorize_aqi(aqi: float) -> str:
 def send_air_quality_report():
     """Fetch latest air quality data and send emails to subscribers."""
     with app.app_context():
+        forecast_result = forecast_air_quality()
+        predicted_aqi = aqi_classification(forecast_result)
+        aqi_class, advice = categorize_aqi(predicted_aqi)
+
+        sms_string = (
+            f"Air Quality:\n"
+            f"O3:{forecast_result.get('O3'):.2f}ppm CO:{forecast_result.get('CO'):.2f}ppm "
+            f"CO2:{forecast_result.get('CO2'):.0f}ppm TVOC:{forecast_result.get('TVOC'):.0f}ppm\n"
+            f"PM2.5:{forecast_result.get('PM2_5'):.2f} PM10:{forecast_result.get('PM10'):.2f}\n"
+            f"NO2:{forecast_result.get('NO2'):.2f} SO2:{forecast_result.get('SO2'):.2f} "
+            f"H2S:{forecast_result.get('H2S'):.2f}\n"
+            f"AQI:{predicted_aqi:.2f} ({aqi_class})\n"
+            f"Advice: {advice}\n"
+        )
+
+        pref = db.reference(DB_PREDICTIONS)
+        pref.set(sms_string)
+
         ref = db.reference(DB_SUBSCRIBER)
         subscribers = ref.get()
 
@@ -176,30 +196,47 @@ def send_air_quality_report():
         latest_data = df.tail(1).to_dict(orient='records')[0]
 
         # Prepare email content
-        report_body = f"""
-        Air Quality Report for {datetime.now().strftime('%B %d, %Y')}:
+        email_body = (
+            f"Subject: Forecasted Air Quality Report\n\n"
+            f"📊 Forecasted Air Quality:\n"
+            f"O₃ (ppm): {forecast_result.get('O3'):.2f}\n"
+            f"CO (ppm): {forecast_result.get('CO'):.2f}\n"
+            f"CO₂ (ppm): {forecast_result.get('CO2'):.0f}\n"
+            f"TVOC (ppm): {forecast_result.get('TVOC'):.0f}\n"
+            f"PM2.5 (µg/m³): {forecast_result.get('PM2_5'):.2f}\n"
+            f"PM10 (µg/m³): {forecast_result.get('PM10'):.2f}\n"
+            f"NO₂ (ppm): {forecast_result.get('NO2'):.2f}\n"
+            f"SO₂ (ppm): {forecast_result.get('SO2'):.2f}\n"
+            f"H₂S (ppm): {forecast_result.get('H2S'):.2f}\n\n"
+            f"🌫️ Air Quality Index (AQI): {predicted_aqi:.2f}\n"
+            f"🟢 Overall Air Quality: {aqi_class}\n\n"
+            f"📝 Advice: {advice}\n\n"
+            f"🔗 For more information, visit:\n"
+            f"https://air-quality-web.vercel.app/"
+        )
 
-        CO2: {latest_data.get('CO2')} PPM
-        TVOC: {latest_data.get('TVOC')} PPB
-        SO2: {latest_data.get('SO2')} PPM
-        O3: {latest_data.get('O3')} PPM
-        H2S: {latest_data.get('H2S')} PPM
-        NO2: {latest_data.get('NO2')} PPM
-        CO: {latest_data.get('CO')} PPM
-        PM2.5: {latest_data.get('PM2_5')} µg/m³
-        PM10: {latest_data.get('PM10')} µg/m³
-
-        Stay safe!
-        """
 
         try:
             msg = Message("Daily Air Quality Report", recipients=emails)
-            msg.body = report_body
+            msg.body = email_body
             mail.send(msg)
             print(f"Email sent to {len(emails)} subscribers.")
 
         except Exception as e:
             print(f"Error sending email: {e}")
+
+        numbers_set = set()
+        numbers = [sub.get("number").strip() for sub in subscribers if sub and sub.get("number")]
+        for number in numbers:
+            number = number.strip()  # Clean whitespace
+            if number.startswith('09') and len(number) == 11:
+                number = '63' + number[1:]
+            numbers_set.add(number)
+
+        formatted_numbers = list(numbers_set)
+        print(f"Formatted unique numbers: {formatted_numbers}")
+        send_sms(formatted_numbers, email_body)
+        print("Air quality report sent successfully.")
 
 @app.route("/subscribe", methods=["POST"])
 def subscribe():
@@ -272,8 +309,7 @@ def get_sensor_data(forecast):
     if forecast:
         forecast_result = forecast_air_quality()
         predicted_aqi = aqi_classification(forecast_result)
-        aqi_lvl = categorize_aqi(predicted_aqi)
-        aqi_class, advice = get_air_quality_advice(aqi_class)
+        aqi_class, advice = categorize_aqi(predicted_aqi)
         print(advice)
         sensor_data = [
             { "id": 'CO2_container', "label": 'CO₂ (PPM)', "value": "{0:.2f}".format(forecast_result.get("CO2"))},
@@ -285,7 +321,7 @@ def get_sensor_data(forecast):
             { "id": 'CO_container', "label": 'CO (PPM)', "value": "{0:.2f}".format(forecast_result.get("CO"))},
             { "id": 'PM2_container', "label": 'PM2.5 (µg/m³)', "value": "{0:.2f}".format(forecast_result.get("PM2_5"))},
             { "id": 'PM10_container', "label": 'PM10 (µg/m³)', "value": "{0:.2f}".format(forecast_result.get("PM10"))},
-            { "id": 'aqi_container', "label": 'Air Quality Class', "evaluation": aqi_class, "advice": advice, "aqi": aqi_lvl}
+            { "id": 'aqi_container', "label": 'Air Quality Class', "evaluation": aqi_class, "advice": advice, "aqi": predicted_aqi}
         ]
         return jsonify(sensor_data)
     else:
@@ -349,7 +385,7 @@ def schedule_email():
     """Runs a background thread to send the email daily at 8:00 PM."""
     while True:
         now = datetime.now()
-        target_time = now.replace(hour=4, minute=0 , second=0, microsecond=0)
+        target_time = now.replace(hour=3, minute=59 , second=0, microsecond=0)
 
         if now > target_time:
             target_time += timedelta(days=1)  # Move to next day if already past 8:00 PM
